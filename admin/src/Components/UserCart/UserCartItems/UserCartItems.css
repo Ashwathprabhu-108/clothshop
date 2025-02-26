@@ -1,0 +1,103 @@
+.usercartitems {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 740px;
+    padding: 20px 40px;
+    margin: 20px;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+}
+
+.usercart-items-head {
+    display: grid;
+    grid-template-columns: 1fr 3fr 1fr 1fr 1fr;
+    gap: 15px;
+    width: 100%;
+    padding: 20px 0;
+    color: #333333;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.user-cart-section h2 {
+    font-size: 18px;
+    font-weight: bold;
+    color: #444;
+    text-align: right;
+    width: 100%;
+    padding: 10px 0;
+    border-top: 1px solid #ddd;
+    margin-top: 10px;
+}
+
+.cart-items {
+    display: grid;
+    grid-template-columns: 1fr 3fr 1fr 1fr 1fr;
+    gap: 15px;
+    width: 100%;
+    align-items: center;
+    padding: 15px 0;
+    font-weight: 500;
+    text-align: center;
+    overflow-y: auto;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.cart-icon {
+    height: 62px;
+    object-fit: cover;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    margin: auto; 
+}
+
+.cart-quantity {
+    background: #f9f9f9;
+    padding: 6px 12px;
+    border: 1px solid #dcdcdc;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.cart-quantity:hover {
+    background: #e0e0e0;
+    transform: scale(1.05);
+}
+
+@media (max-width: 800px) {
+    .usercartitems {
+        box-sizing: border-box;
+        width: 95%;
+        height: auto;
+        padding: 15px 20px;
+        margin: 20px auto;
+    }
+
+    .usercart-items-head,
+    .cart-items {
+        grid-template-columns: 1fr 2fr 1fr 1fr 1fr;
+        gap: 10px;
+        padding: 10px 0;
+        font-size: 12px;
+    }
+
+    .cart-icon {
+        height: 40px;
+        width: 40px;
+        border-radius: 4px;
+    }
+
+    .cart-quantity {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+}
