@@ -1,105 +1,170 @@
-.cartitems{
+.cartitems {
     margin: 100px 170px;
 }
-.cartitems hr{
+
+.cartitems hr {
     height: 3px;
     background: #e2e2e2;
     border: 0;
 }
-.cartitems-format-main{
+
+.cartitems-format-main {
     display: grid;
     grid-template-columns: 0.5fr 2fr 1fr 1fr 1fr 1fr;
     align-items: center;
-    gap: 75px;
-    padding: 20px 0px;
+    gap: 50px;
+    padding: 20px 0;
     font-size: 18px;
     font-weight: 600;
+    text-align: center;
 }
-.cartitems-format{
+
+.cartitems-format {
     font-size: 17px;
     font-weight: 500;
+    display: grid;
+    grid-template-columns: 0.5fr 2fr 1fr 1fr 1fr 1fr;
+    align-items: center;
+    gap: 50px;
+    padding: 10px 0;
+    text-align: center;
 }
-.carticon-product-icon{
+
+.carticon-product-icon {
     height: 62px;
+    object-fit: contain;
 }
-.cartitems-remove-icon{
-    width: 15px;
-    margin: 0px 40px;
+
+.cartitems-remove-icon {
+    width: 18px;
     cursor: pointer;
+    transition: 0.2s ease-in-out;
 }
-.cartitems-quantity{
-    width: 64px;
-    height: 50px;
+
+.cartitems-remove-icon:hover {
+    transform: scale(1.2);
+}
+
+.cartitems-quantity {
+    width: 50px;
+    height: 40px;
     border: 2px solid #ebebeb;
     background: #fff;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: default;
 }
-.cartitems-down{
+
+.cartitems-total {
     display: flex;
-    margin: 100px 0px;
+    justify-content: flex-end;
+    margin-top: 30px;
 }
-.cartitems-total{
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    margin-right: 200px;
-    gap: 40px;
-}
-.cartitems-total-item{
-    display: flex;
-    justify-content: space-between;
-    padding: 15px 0px;
-}
-.cartitems-total button{
-    width: 262px;
-    height: 58px;
+
+.cartitems-total button {
+    width: 200px;
+    height: 50px;
     outline: none;
     border: none;
     background: #ff5a5a;
     color: #fff;
     font-size: 16px;
-    font-weight: 60;cursor: pointer;
+    font-weight: 600;
+    cursor: pointer;
+    
+    transition: 0.2s ease-in-out;
+    border-radius: 5px;
 }
-@media (max-width:1280px) {
-    .cartitems{
+
+.cartitems-total button:hover {
+    background: #e24444;
+}
+
+@media (max-width: 1024px) {
+    .cartitems {
         margin: 60px 50px;
     }
-    .cartitems-format-main{
+
+    .cartitems-format-main, .cartitems-format {
         grid-template-columns: 0.5fr 3fr 0.5fr 0.5fr 0.5fr 0.5fr;
         gap: 20px;
-        padding: 15px 0px;
         font-size: 15px;
     }
-    .carticon-product-icon{
+
+    .carticon-product-icon {
         height: 50px;
     }
-    .cartitems-remove-icon{
-        margin: auto;
-    }
-    .cartitems-quantity{
+
+    .cartitems-quantity {
         width: 40px;
         height: 30px;
+        font-size: 14px;
     }
-    .cartitems-down{
-        margin: 80px 0px;
-        flex-direction: column;
-        gap: 80px;
-    }
-    .cartitems-total{
-        margin: 0;
-    }
-    .cartitems-total button{
-        max-width: 200px;
+
+    .cartitems-total button {
+        width: 180px;
         height: 45px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 768px) {
+    .cartitems-format-main {
+        display: none;
+    }
+
+    .cartitems-format {
+        display: grid;
+        grid-template-columns: 0.5fr 3fr 0.5fr 0.5fr;
+        gap: 15px;
+        text-align: left;
+    }
+
+    .cartitems-remove-icon {
+        width: 14px;
+    }
+
+    .cartitems-quantity {
+        width: 35px;
+        height: 28px;
+        font-size: 12px;
+    }
+
+    .cartitems-total button {
+        width: 160px;
+        height: 40px;
         font-size: 13px;
     }
 }
-@media (max-width:500px) {
-    .cartitems-format-main{
-        display: none;
-        grid-template-columns: 0.5fr 3fr 0.5fr;
+
+@media (max-width: 500px) {
+    .cartitems {
+        margin: 40px 20px;
+    }
+
+    .cartitems-format {
+        grid-template-columns: 1fr 2fr 1fr;
         gap: 10px;
     }
-    .cartitems-format{
-        display: grid;
+
+    .carticon-product-icon {
+        height: 40px;
+    }
+
+    .cartitems-remove-icon {
+        width: 12px;
+    }
+
+    .cartitems-quantity {
+        width: 30px;
+        height: 25px;
+        font-size: 10px;
+    }
+
+    .cartitems-total button {
+        width: 140px;
+        height: 35px;
+        font-size: 12px;
     }
 }

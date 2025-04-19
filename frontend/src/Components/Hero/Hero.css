@@ -28,7 +28,9 @@
     gap: 20px;
 }
 .hero-hand-icon img{
+    padding-top: 10px;
     width: 105px;
+    height: 100px;
 }
 .hero-latest-button{
     display: flex;

@@ -31,30 +31,29 @@ const LoginSignup = () => {
     }
   };
 
-  const login = async () => {
-    let responseData;
-    await fetch('http://localhost:4000/login', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    })
-    .then((response) => response.json())
-    .then((data) => responseData = data);
-
-    if (responseData.success) {
-      localStorage.setItem('auth-token', responseData.token);
-      window.location.replace("/");
-    } else {
-      alert(responseData.errors);
-    }
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
 
-  const signup = async () => {
+  const validatePassword = (password) => {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[_])[A-Za-z\d_]{8,}$/;
+    return passwordRegex.test(password);
+  };
+
+  const handleSubmit = async () => {
+    if (!validateEmail(formData.email)) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+
+    if (!validatePassword(formData.password)) {
+      alert("Password must be at least 8 characters long and include uppercase, lowercase, a number, and a special character.");
+      return;
+    }
+
     let responseData;
-    await fetch('http://localhost:4000/signup', {
+    await fetch(`http://localhost:4000/${state === "Login" ? "login" : "signup"}`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -82,7 +81,7 @@ const LoginSignup = () => {
             <>
               <input type="text" name="username" value={formData.username} onChange={changeHandler} placeholder="Your Name" />
               <input type="text" name="address.fullAddress" value={formData.address.fullAddress} onChange={changeHandler} placeholder="Full Address" />
-              <input type="text" name="address.street" value={formData.address.street} onChange={changeHandler} placeholder="Street" />
+              <input type="text" name="address.street" value={formData.address.street} onChange={changeHandler} placeholder="Post" />
               <input type="text" name="address.city" value={formData.address.city} onChange={changeHandler} placeholder="City" />
               <input type="text" name="address.district" value={formData.address.district} onChange={changeHandler} placeholder="District" />
               <input type="text" name="address.state" value={formData.address.state} onChange={changeHandler} placeholder="State" />
@@ -93,7 +92,7 @@ const LoginSignup = () => {
           <input type="email" name="email" value={formData.email} onChange={changeHandler} placeholder="Email Address" />
           <input type="password" name="password" value={formData.password} onChange={changeHandler} placeholder="Password" />
         </div>
-        <button onClick={() => (state === "Login" ? login() : signup())}>Continue</button>
+        <button onClick={handleSubmit}>Continue</button>
         {state === "Sign Up"
           ? <p className="loginsignup-login">Already have an account? <span onClick={() => setState("Login")}>Login here</span></p>
           : <p className="loginsignup-login">Create an account? <span onClick={() => setState("Sign Up")}>Click here</span></p>}

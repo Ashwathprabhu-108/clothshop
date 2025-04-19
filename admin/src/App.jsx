@@ -4,12 +4,12 @@ import Admin from './Pages/Admin/Admin';
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(
-    localStorage.getItem('isAuthenticated') === 'true'
+    sessionStorage.getItem('isAuthenticated') === 'true'
   );
   const [credentials, setCredentials] = useState({ username: '', password: '' });
 
   useEffect(() => {
-    localStorage.setItem('isAuthenticated', isAuthenticated);
+    sessionStorage.setItem('isAuthenticated', isAuthenticated);
   }, [isAuthenticated]);
 
   const handleLogin = () => {
@@ -18,7 +18,7 @@ const App = () => {
 
     if (credentials.username === correctUsername && credentials.password === correctPassword) {
       setIsAuthenticated(true);
-      localStorage.setItem('isAuthenticated', 'true');
+      sessionStorage.setItem('isAuthenticated', 'true'); 
     } else {
       alert('Invalid username or password');
     }

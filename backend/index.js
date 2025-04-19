@@ -93,6 +93,7 @@ const Product = mongoose.model("Product", {
 });
 
 
+//Api to add product
 app.post('/addproduct',async (req,res) =>{
     let products = await Product.find({});
     let id;
@@ -178,12 +179,70 @@ const Users = mongoose.model('Users', {
     }
 });
 
+
 //creating endpoint for admin user details
-app.get('/getallcarts',async (req,res)=>{
+app.get('/getallusers',async (req,res)=>{
     let usersdetail = await Users.find({});
     console.log("All Users Fetched");
     res.send(usersdetail);
 })
+
+// Creating endpoint for fetching reviews
+app.get('/getreviews/:productId', async (req, res) => {
+    const { productId } = req.params;
+  
+    const reviews = await Review.find({ productId });
+    if (!reviews) {
+      return res.status(404).json({ message: "No reviews found for this product" });
+    }
+  
+    res.status(200).json(reviews);
+  });
+
+  // Creating endpoint for deleting reviews
+  app.delete('/deletereview/:id', async (req, res) => {
+    const { id } = req.params;
+    const { username } = req.body;
+  
+    const review = await Review.findById(id);
+    if (!review) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+  
+    if (review.username !== username) {
+      return res.status(403).json({ message: "You can only delete your own reviews" });
+    }
+  
+    await Review.findByIdAndDelete(id);
+    const updatedReviews = await Review.find({ productId: review.productId });
+    res.status(200).json({ reviews: updatedReviews });
+  });  
+
+// Creating endpoint for adding reviews
+app.post('/addreview/:productId', async (req, res) => {
+    const productId = parseInt(req.params.productId);
+    if (isNaN(productId)) {
+      return res.status(400).json({ message: "Invalid product ID" });
+    }
+  
+    const { text, rating } = req.body;
+    if (!text || text.trim() === "") {
+      return res.status(400).json({ message: "Review text is required" });
+    }
+    if (typeof rating !== "number" || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: "Invalid rating value" });
+    }
+  
+    const product = await Product.findOne({ id: productId });
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+  
+    product.reviews.push({ text, rating });
+    await product.save();
+  
+    res.status(200).json({ reviews: product.reviews });
+  });
 
 //Creating API For deleting users
 app.post('/removeuser',async (req,res)=>{
@@ -194,7 +253,6 @@ app.post('/removeuser',async (req,res)=>{
         name:req.body.name
     })
 })
-
 
 //Creating Endpoint for registering the user
 app.post('/signup',async (req,res)=>{
@@ -269,10 +327,10 @@ app.get('/newcollections',async (req,res)=>{
 
 //creating endpoint for popular in women section
 app.get('/popularinwomen',async (req,res)=>{
-    let products = await Product.find({category:"women"});
-    let Popullar_in_women = products.slice(0,4);
+    let products = await Product.find({});
+    let Popullar= products.slice(0,4);
     console.log("Popular in women fetched");
-    res.send(Popullar_in_women);
+    res.send(Popullar);
 })
 
 //creating middelware to fetch user
@@ -291,6 +349,52 @@ const fetchUser = async (req,res,next)=>{
         }
     }
 }
+
+// Endpoint to fetch all users' address details for the admin page
+app.get('/getaddress', fetchUser, async (req, res) => {
+    try {
+        const user = await Users.findOne({ _id: req.user.id }, { address: 1 });
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+        res.json({ success: true, address: user.address });
+    } catch (error) {
+        console.error("Error fetching address:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+});
+
+// API update address
+app.put('/updateaddress', fetchUser, async (req, res) => {
+    try {
+        const { fullAddress, street, city, district, state, pincode, phoneNumber } = req.body;
+
+        const updatedUser = await Users.findByIdAndUpdate(
+            req.user.id,
+            {
+                $set: {
+                    "address.fullAddress": fullAddress,
+                    "address.street": street,
+                    "address.city": city,
+                    "address.district": district,
+                    "address.state": state,
+                    "address.pincode": pincode,
+                    "address.phoneNumber": phoneNumber,
+                },
+            },
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        res.json({ success: true, user: updatedUser });
+    } catch (error) {
+        console.error("Error updating address:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+});
 
 //creating endpoint save cart products in cartdata
 app.post('/addtocart',fetchUser,async(req,res)=>{
@@ -355,6 +459,8 @@ app.get('/getallcartdetails', async (req, res) => {
         res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 });
+
+// Schema Creating for User model
 
 
 app.listen(port,(error)=>{

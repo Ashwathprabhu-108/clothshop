@@ -9,7 +9,7 @@ const UserCart = () => {
   const [users, setUsers] = useState([]);
 
   const fetchCarts = async () => {
-    await fetch('http://localhost:4000/getallcarts')
+    await fetch('http://localhost:4000/getallusers')
       .then((res) => res.json())
       .then((data) => { setUsers(data) });
   };
@@ -42,13 +42,15 @@ const UserCart = () => {
       <div className="cart-allusers">
         <hr />
         {users.map((user, index) => (
-          <div key={index} className="cart-user-info">
+          <div>
+            <div key={index} className="cart-user-info">
             <p>{user.name}</p>
             <p>{user.email}</p>
-            <Link to={'/usercartitems'} state={{ cart: user.cartData }}><img src={cart_icon} alt="cart" className="cart-icon" /></Link>
+            <Link to={'/usercartitems'} state={{ email: user.email }}><img src={cart_icon} alt="cart" className="cart-icon" /></Link>
             <img onClick={()=>{remove_user(user.email)}} className='listproduct-remove-icon' src={cross_icon} alt="" />
-            <hr />
           </div>
+          <hr />
+          </div> 
         ))}
       </div>
     </div>
