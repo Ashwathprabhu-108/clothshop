@@ -328,6 +328,46 @@ app.post('/addreply/:id', async (req, res) => {
   }
 });
 
+//creating endpoint for getting all reviews to get average rating
+app.get('/productrating/:productId', async (req, res) => {
+    const productId = Number(req.params.productId);
+
+    if (isNaN(productId)) {
+        return res.status(400).json({ message: "Invalid product ID" });
+    }
+
+    try {
+        // Fetch all reviews for the given product ID
+        const reviews = await Review.find({ productId });
+
+        if (reviews.length === 0) {
+            return res.status(404).json({ message: "No reviews found for this product" });
+        }
+
+        // Filter only valid ratings (between 1 and 5)
+        const validReviews = reviews.filter(review => review.rating >= 1 && review.rating <= 5);
+
+        if (validReviews.length === 0) {
+            return res.status(400).json({ message: "No valid ratings found (1-5 range)" });
+        }
+
+        // Calculate the total rating and average rating
+        const totalRating = validReviews.reduce((sum, review) => sum + review.rating, 0);
+        const averageRating = Math.round((totalRating / validReviews.length) * 100) / 100;
+
+        res.status(200).json({
+            productId,
+            totalRating,
+            totalReviews: validReviews.length,
+            averageRating,
+        });
+    } catch (error) {
+        console.error("Error fetching product rating:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+
 //Creating API For deleting users
 app.post('/removeuser',async (req,res)=>{
     await Users.findOneAndDelete({email:req.body.email});
