@@ -194,7 +194,6 @@ const Users = mongoose.model('Users', {
     }
 });
 
-
 //creating endpoint for admin user details
 app.get('/getallusers',async (req,res)=>{
     let usersdetail = await Users.find({});
@@ -545,6 +544,34 @@ app.post('/getcart',fetchUser,async(req,res)=>{
     let userData = await Users.findOne({_id:req.user.id});
     res.json(userData.cartData);
 })
+
+app.get("/getuser", async (req, res) => {
+    const authToken = req.headers["auth-token"];
+    const secretKey = "secret_ecom"; // Ensure the secret key is defined
+
+    if (!authToken) {
+        return res.status(401).json({ message: "No token provided" });
+    }
+
+    try {
+        // Verify the token
+        const decoded = jwt.verify(authToken, secretKey);
+
+        // Fetch the user from the database
+        const user = await Users.findById(decoded.user.id);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Exclude sensitive information like the password
+        const { password, ...userDetails } = user.toObject();
+        res.status(200).json(userDetails);
+    } catch (err) {
+        console.error("Error in /getuser:", err);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
 
 //creating endpoint to get user cartdata in admin page.
 app.get('/getallcartdetails', async (req, res) => {

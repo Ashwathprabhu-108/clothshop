@@ -117,7 +117,7 @@ const ShopContextProvider = (props) => {
         cartItems,
         addToCart,
         removeFromCart,
-        user, // Provide user in the context
+        user, 
     };
 
     return (
