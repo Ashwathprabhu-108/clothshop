@@ -57,7 +57,6 @@ const Review = mongoose.model("Review", {
 });
 
 //Schema for Creating Products
-
 const Product = mongoose.model("Product", {
     id: {
         type: Number,
@@ -99,12 +98,10 @@ const Product = mongoose.model("Product", {
         type: [String], 
         required: true,
     },
-    reviews: [
-        {
-            rating: { type: Number, required: true, min: 0, max: 5 }, 
-            text: { type: String, required: true },
-        },
-    ],
+    stock: {
+        type: Number,
+        default: 0,
+    },
 });
 
 
@@ -129,6 +126,9 @@ app.post('/addproduct',async (req,res) =>{
         new_price:req.body.new_price,
         old_price:req.body.old_price,
         description:req.body.description,
+        size:req.body.size,
+        stock: req.body.stock || 0,
+        available: req.body.available || true,
     })
     console.log(product);
     await product.save();
