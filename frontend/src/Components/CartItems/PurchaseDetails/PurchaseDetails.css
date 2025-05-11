@@ -35,7 +35,7 @@ body {
 }
 
 .address-details {
-    min-height: 70vh;
+    min-height: 10vh;
     width: 95%;
     min-width: 600px;
     border-radius: 10px;

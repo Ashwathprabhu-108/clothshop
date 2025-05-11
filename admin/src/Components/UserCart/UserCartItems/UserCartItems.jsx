@@ -28,26 +28,35 @@ const UserCartItems = () => {
   return (
     <div className='usercartitems'>
       <h1>Cart Items</h1>
-      <div className="usercart-items-head">
-        <p>Products</p>
-        <p>Title</p>
-        <p>Price</p>
-        <p>Quantity</p>
-        <p>Total</p>
-      </div>
-
       {cartData.length > 0 ? (
         <div className="user-cart-section">
           <h2>Total: ₹{cartData.reduce((acc, item) => acc + item.new_price * item.quantity, 0)}</h2>
-          {cartData.map(item => (
-            <div className="cart-items" key={item.productId}>
-              <img src={item.image} alt={item.name} className="cart-icon" />
-              <p>{item.name}</p>
-              <p>₹{item.new_price}</p>
-              <button className="cart-quantity">{item.quantity}</button>
-              <p>₹{item.new_price * item.quantity}</p>
-            </div>
-          ))}
+          <table className="usercart-table">
+            <thead>
+              <tr>
+                <th>Products</th>
+                <th>Title</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cartData.map(item => (
+                <tr key={item.productId}>
+                  <td>
+                    <img src={item.image} alt={item.name} className="cart-icon" />
+                  </td>
+                  <td>{item.name}</td>
+                  <td>₹{item.new_price}</td>
+                  <td>
+                    <button className="cart-quantity">{item.quantity}</button>
+                  </td>
+                  <td>₹{item.new_price * item.quantity}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       ) : (
         <p>No items in the cart.</p>

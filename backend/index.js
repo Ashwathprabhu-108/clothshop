@@ -41,6 +41,21 @@ app.post("/upload",upload.single('product'),(req,res)=>{
     })
 })
 
+//Schema for Creating reviews
+const Review = mongoose.model("Review", {
+  productId: { type: Number, required: true },
+  username: { type: String, required: true },
+  text: { type: String, required: true },
+  rating: { type: Number, required: true, min: 1, max: 5 },
+  replies: [
+    {
+      username: String,
+      text: String,
+      createdAt: { type: Date, default: Date.now }
+    }
+  ]
+});
+
 //Schema for Creating Products
 
 const Product = mongoose.model("Product", {
@@ -187,62 +202,131 @@ app.get('/getallusers',async (req,res)=>{
     res.send(usersdetail);
 })
 
-// Creating endpoint for fetching reviews
-app.get('/getreviews/:productId', async (req, res) => {
-    const { productId } = req.params;
-  
-    const reviews = await Review.find({ productId });
-    if (!reviews) {
-      return res.status(404).json({ message: "No reviews found for this product" });
-    }
-  
-    res.status(200).json(reviews);
-  });
 
-  // Creating endpoint for deleting reviews
-  app.delete('/deletereview/:id', async (req, res) => {
-    const { id } = req.params;
-    const { username } = req.body;
-  
+// Endpoint to get reviews by product ID
+app.get('/reviews/:productId', async (req, res) => {
+    const { productId } = req.params;
+    try {
+        const reviews = await Review.find({ productId: parseInt(productId) }).sort({ createdAt: -1 });
+        res.status(200).json(reviews); 
+    } catch (error) {
+        console.error("Error fetching reviews:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+// Creating endpoint for deleting reviews
+app.delete('/deletereview/:id', async (req, res) => {
+  const { id } = req.params;
+  const { username } = req.body;
+
+  try {
+    const review = await Review.findById(id);
+
+    if (!review) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
+    if (review.username !== username) {
+      return res.status(403).json({ message: "You can only delete your own reviews" });
+    }
+
+    await review.deleteOne(); 
+
+    const updatedReviews = await Review.find({ productId: review.productId });
+    res.status(200).json({ reviews: updatedReviews });
+  } catch (error) {
+    console.error("Error deleting review:", error);
+    res.status(500).json({ message: "Failed to delete review" });
+  }
+});  
+
+//adding endpoint for adding reviews
+app.post('/addreview', async (req, res) => {
+    const { productId, username, text, rating } = req.body;
+    if (!productId) {
+        return res.status(400).json({ message: "Product ID is required" });
+    }
+    if (!username) {
+        return res.status(400).json({ message: "Username is required" });
+    }
+    if (!text || text.trim() === "") {
+        return res.status(400).json({ message: "Review text is required" });
+    }
+    if (typeof rating !== "number" || rating < 1 || rating > 5) {
+        return res.status(400).json({ message: "Invalid rating value" });
+    }
+
+    try {
+        const newReview = new Review({
+            productId: Number(productId),
+            username,
+            text,
+            rating,
+        });
+        await newReview.save();
+
+        res.status(201).json({ message: "Review added successfully", review: newReview });
+    } catch (error) {
+        console.error("Error adding review:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+// Edit a review
+app.put('/review/:id', async (req, res) => {
+    const { username, text, rating } = req.body;
+
+    if (!username || !text || typeof rating !== "number") {
+        return res.status(400).json({ message: "Incomplete data for update" });
+    }
+
+    try {
+        const review = await Review.findById(req.params.id);
+        if (!review) {
+            return res.status(404).json({ message: "Review not found" });
+        }
+
+        if (review.username !== username) {
+            return res.status(403).json({ message: "Unauthorized to edit this review" });
+        }
+
+        review.text = text;
+        review.rating = rating;
+        review.updatedAt = new Date();
+
+        await review.save();
+        res.status(200).json({ message: "Review updated", review });
+    } catch (error) {
+        console.error("Error updating review:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+//adding endpoint for adding replies
+app.post('/addreply/:id', async (req, res) => {
+  const { id } = req.params;
+  const { username, text } = req.body;
+
+  if (!username || !text) {
+    return res.status(400).json({ message: "Username and text are required" });
+  }
+
+  try {
     const review = await Review.findById(id);
     if (!review) {
       return res.status(404).json({ message: "Review not found" });
     }
-  
-    if (review.username !== username) {
-      return res.status(403).json({ message: "You can only delete your own reviews" });
-    }
-  
-    await Review.findByIdAndDelete(id);
-    const updatedReviews = await Review.find({ productId: review.productId });
-    res.status(200).json({ reviews: updatedReviews });
-  });  
 
-// Creating endpoint for adding reviews
-app.post('/addreview/:productId', async (req, res) => {
-    const productId = parseInt(req.params.productId);
-    if (isNaN(productId)) {
-      return res.status(400).json({ message: "Invalid product ID" });
-    }
-  
-    const { text, rating } = req.body;
-    if (!text || text.trim() === "") {
-      return res.status(400).json({ message: "Review text is required" });
-    }
-    if (typeof rating !== "number" || rating < 1 || rating > 5) {
-      return res.status(400).json({ message: "Invalid rating value" });
-    }
-  
-    const product = await Product.findOne({ id: productId });
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-  
-    product.reviews.push({ text, rating });
-    await product.save();
-  
-    res.status(200).json({ reviews: product.reviews });
-  });
+    review.replies.push({ username, text });
+    await review.save();
+
+    res.status(200).json({ message: "Reply added successfully", review });
+  } catch (error) {
+    console.error("Error adding reply:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 
 //Creating API For deleting users
 app.post('/removeuser',async (req,res)=>{
