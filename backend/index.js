@@ -90,10 +90,6 @@ const Product = mongoose.model("Product", {
         type: String,
         required: true,
     },
-    size: {
-        type: [String], 
-        required: true,
-    },
     stock: {
         type: Number,
         default: 0,
@@ -126,7 +122,7 @@ app.post('/addproduct', async (req, res) => {
         description: req.body.description,
         size: req.body.size,
         stock: req.body.stock,
-        available: available=stock>0, // Save availability
+        available: req.body.stock > 0,
     });
 
     await product.save();

@@ -3,8 +3,8 @@ import "./Item.css";
 import { Link } from 'react-router-dom';
 
 const Item = (props) => {
+  
   console.log("Item props:", props);
-
   return (
     <div className='item'>
       <Link to={`/product/${props.id}`}>
@@ -15,9 +15,7 @@ const Item = (props) => {
         <div className="item-price-new">₹{props.new_price}</div>
         <div className="item-price-old">₹{props.old_price}</div>
       </div>
-      <div className="item-stock">
-       <p>{props.available ? `${props.stock} in stock` : "Unavailable"}</p>
-      </div>
+      <p>Available: {props.available ? "Yes" : "No"}</p>
     </div>
   );
 };

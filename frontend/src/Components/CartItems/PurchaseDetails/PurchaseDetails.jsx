@@ -192,7 +192,6 @@ const PurchaseDetails = () => {
                     </div>
                 </div>
             </div>
-            <button className="purchase-history-btn">Purchase History</button>
         </div>
     );
 };
