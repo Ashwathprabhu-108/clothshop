@@ -19,7 +19,10 @@ const ShopContextProvider = (props) => {
         // Fetch all products
         fetch("http://localhost:4000/allproducts")
             .then((response) => response.json())
-            .then((data) => setAll_Product(data));
+            .then((data) =>{
+                console.log("Fetched products:", data);
+                setAll_Product(data)}
+            );
 
         // Fetch user cart if authenticated
         if (localStorage.getItem("auth-token")) {

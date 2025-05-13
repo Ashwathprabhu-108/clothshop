@@ -86,10 +86,6 @@ const Product = mongoose.model("Product", {
         type: Date,
         default: Date.now,
     },
-    available: {
-        type: Boolean,
-        default: true,
-    },
     description: {
         type: String,
         required: true,
@@ -102,45 +98,45 @@ const Product = mongoose.model("Product", {
         type: Number,
         default: 0,
     },
+    available: { 
+        type: Boolean ,
+        required: true,
+    },
 });
 
 
 //Api to add product
-app.post('/addproduct',async (req,res) =>{
+app.post('/addproduct', async (req, res) => {
     let products = await Product.find({});
     let id;
-    if (products.length>0) {
+    if (products.length > 0) {
         let last_product_array = products.slice(-1);
         let last_product = last_product_array[0];
-        id=last_product.id+1;
-    }
-    else
-    {
-        id=1;
+        id = last_product.id + 1;
+    } else {
+        id = 1;
     }
     const product = new Product({
-        id:id,
-        name:req.body.name,
-        image:req.body.image,
-        category:req.body.category,
-        new_price:req.body.new_price,
-        old_price:req.body.old_price,
-        description:req.body.description,
-        size:req.body.size,
-        stock: req.body.stock || 0,
-        available: req.body.available || true,
-    })
-    console.log(product);
+        id: id,
+        name: req.body.name,
+        image: req.body.image,
+        category: req.body.category,
+        new_price: req.body.new_price,
+        old_price: req.body.old_price,
+        description: req.body.description,
+        size: req.body.size,
+        stock: req.body.stock,
+        available: available=stock>0, // Save availability
+    });
+
     await product.save();
-    console.log("Saved");
     res.json({
-        success:true,
-        name:req.body.name,
-    })
-})
+        success: true,
+        name: req.body.name,
+    });
+});
 
 //Creating API For deleting Products
-
 app.post('/removeproduct',async (req,res)=>{
     await Product.findOneAndDelete({id:req.body.id});
     console.log("Removed");

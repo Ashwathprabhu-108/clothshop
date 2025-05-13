@@ -9,7 +9,9 @@ const Listproduct = () => {
   const fetchInfo = async () => {
     await fetch('http://localhost:4000/allproducts')
     .then((res)=>res.json())
-    .then((data)=>{setAllProducts(data)});
+    .then((data)=>{
+      console.log("All products in Listproduct:", data);
+      setAllProducts(data)});
   }
 
   useEffect(()=>{
@@ -34,8 +36,8 @@ const Listproduct = () => {
         <div className="listproduct-format-main">
           <p>Products</p>
           <p>Title</p>
-          <p>Old Price</p>
-          <p>New Price</p>
+          <p>Stock</p>
+          <p>Price</p>
           <p>Category</p>
           <p>Remove</p>
         </div>
@@ -46,7 +48,7 @@ const Listproduct = () => {
             <div key={index} className="listproduct-format-main listproduct-format">
               <img src={product.image} alt="" className="listproduct-product-icon" />
               <p>{product.name}</p>
-              <p>₹{product.old_price}</p>
+              <p>{product.stock}</p>
               <p>₹{product.new_price}</p>
               <p>{product.category}</p>
               <img onClick={()=>{remove_product(product.id)}} className='listproduct-remove-icon' src={cross_icon} alt="" />
