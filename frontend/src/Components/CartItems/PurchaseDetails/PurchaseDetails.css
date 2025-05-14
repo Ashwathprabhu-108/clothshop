@@ -2,6 +2,7 @@ body {
     margin-bottom: 0;
     padding-bottom: 0;
 }
+
 .purchase-details {
     width: 95%;
     margin: 30px;
@@ -26,9 +27,11 @@ body {
     cursor: pointer;
     border-radius: 5px;
 }
+
 .purchase-history-btn {
     margin-bottom: 20px;
 }
+
 .change-btn button:hover,
 .purchase-history-btn:hover {
     background: #e04a4a;
@@ -47,19 +50,6 @@ body {
     flex-direction: column;
     align-items: center;
 }
-.cartitems-quantity {
-    background-color: white !important;
-    color: black !important;
-    border: 1px solid #ccc;
-    padding: 2px 6px;
-    font-size: 12px;
-    border-radius: 4px;
-    width: 100px!important;
-    height: 25px;
-    text-align: center;
-    cursor: default!important;
-}
-
 
 .address-details input {
     height: 50px;
@@ -88,6 +78,19 @@ body {
 
 .address-details button:hover {
     background: #e03939;
+}
+
+.cartitems-quantity {
+    background-color: white !important;
+    color: black !important;
+    border: 1px solid #ccc;
+    padding: 2px 6px;
+    font-size: 12px;
+    border-radius: 4px;
+    width: 100px !important;
+    height: 25px;
+    text-align: center;
+    cursor: default !important;
 }
 
 .cartitems-down {
@@ -127,6 +130,49 @@ body {
     background: #e03939;
 }
 
+.purchase-history {
+    width: 95%;
+    max-height: 300px;
+    overflow-y: scroll;
+    margin-top: 30px;
+    text-align: left;
+    padding: 20px;
+    background: rgb(247, 247, 247);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    scrollbar-width: none;
+}
+
+.purchase-entry {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+}
+
+.purchase-entry p {
+    margin: 5px 0;
+}
+
+.purchase-entry button {
+    width: 200px;
+    height: 45px;
+    background: #ff5a5a;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    border-radius: 5px;
+}
+
+.purchase-entry button:hover {
+    background: #e04a4a;
+}
+
 @media (max-width: 1024px) {
     .purchase-details {
         font-size: 20px;
@@ -152,6 +198,14 @@ body {
         font-size: 18px;
         margin: 18px;
     }
+
+    .cartitems-quantity {
+        width: 80px !important;
+    }
+
+    .purchase-entry button {
+        width: 180px;
+    }
 }
 
 @media (max-width: 500px) {
@@ -165,5 +219,9 @@ body {
         width: 140px;
         height: 40px;
         font-size: 14px;
+    }
+
+    .purchase-entry button {
+        width: 160px;
     }
 }

@@ -209,7 +209,6 @@ const DescriptionBox = ({ productId }) => {
                     <strong>{review.username}:</strong> {review.text} ({review.rating} ⭐)
                   </>
                 )}
-
                 {review.username === user?.name && (
                   <>
                     <button onClick={() => handleDeleteReview(review._id)}>Delete</button>
@@ -230,7 +229,7 @@ const DescriptionBox = ({ productId }) => {
                 </button>
 
                 {review.replies && review.replies.length > 0 && (
-                  <ul className="replies">
+                  <ul className="replies">Replies
                     {review.replies.map((reply, idx) => (
                       <li key={idx}>
                         <strong>{reply.username}:</strong> {reply.text}

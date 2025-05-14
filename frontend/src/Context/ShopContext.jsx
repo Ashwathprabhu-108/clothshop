@@ -47,8 +47,8 @@ const ShopContextProvider = (props) => {
             })
                 .then((response) => response.json())
                 .then((data) => {
-                    console.log("Fetched user:", data); // Debugging
-                    setUser(data); // Ensure the user object contains `username`
+                    console.log("Fetched user:", data); 
+                    setUser(data); 
                 })
                 .catch((error) => console.error("Error fetching user:", error));
         }

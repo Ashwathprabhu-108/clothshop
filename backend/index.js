@@ -132,6 +132,40 @@ app.post('/addproduct', async (req, res) => {
     });
 });
 
+// Endpoint to edit a product
+app.put('/editproduct/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, image, category, new_price, old_price, description, stock } = req.body;
+
+    try {
+        const updatedProduct = await Product.findOneAndUpdate(
+            { id: parseInt(id) }, // if using custom id
+            {
+                $set: {
+                    name,
+                    image,
+                    category,
+                    new_price,
+                    old_price,
+                    description,
+                    stock,
+                    available: stock > 0,
+                },
+            },
+            { new: true }
+        );
+
+        if (!updatedProduct) {
+            return res.status(404).json({ success: false, message: "Product not found" });
+        }
+
+        res.status(200).json({ success: true, product: updatedProduct });
+    } catch (error) {
+        console.error("Error updating product:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+});
+
 //Creating API For deleting Products
 app.post('/removeproduct',async (req,res)=>{
     await Product.findOneAndDelete({id:req.body.id});
@@ -148,6 +182,20 @@ app.get('/allproducts',async (req,res)=>{
     console.log("All Products Fetched");
     res.send(products);
 })
+
+// Express route example (server-side)
+app.get('/product/:id', async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id); // Assuming MongoDB and Mongoose
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+        res.json(product);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching product" });
+    }
+});
+
 
 // Schema Creating for User model
 const Users = mongoose.model('Users', {
@@ -358,7 +406,6 @@ app.get('/productrating/:productId', async (req, res) => {
     }
 });
 
-
 //Creating API For deleting users
 app.post('/removeuser',async (req,res)=>{
     await Users.findOneAndDelete({email:req.body.email});
@@ -465,6 +512,177 @@ const fetchUser = async (req,res,next)=>{
     }
 }
 
+//schema for Purchase 
+const Purchase = mongoose.model("Purchase", {
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Users",
+    required: true,
+  },
+  products: [
+    {
+      id: { type: Number, required: true },
+      name: { type: String, required: true },
+      image: { type: String, required: true },
+      category: { type: String, required: true },
+      new_price: { type: Number, required: true },
+      old_price: { type: Number, required: true },
+      description: { type: String, required: true },
+      quantity: { type: Number, default: 1 },
+    },
+  ],
+  totalAmount: {
+    type: Number,
+    required: true,
+  },
+  address: {
+    type: new mongoose.Schema({
+      fullAddress: { type: String, required: true },
+      street: { type: String, required: true },
+      city: { type: String, required: true },
+      district: { type: String, required: true },
+      state: { type: String, required: true },
+      pincode: { type: String, required: true },
+      phoneNumber: { type: String, required: true },
+    }),
+    required: true,
+  },
+  status: {
+    type: String,
+    enum: ["pending", "completed", "failed"],
+    default: "completed",
+  },
+  date: {
+    type: Date,
+    default: Date.now,
+  },
+  isCancelled: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+//creating endpoint for purchase and save in purchase collection
+app.post("/purchase", fetchUser, async (req, res) => {
+    try {
+        console.log("Request Body:", req.body); 
+
+        const { items, totalAmount, address } = req.body;
+
+        if (!items || items.length === 0) {
+            return res.status(400).send({ success: false, message: "No products provided" });
+        }
+
+        if (!address) {
+            return res.status(400).send({ success: false, message: "Address is required" });
+        }
+
+        const newPurchase = new Purchase({
+            user: req.user.id,
+            products: items,
+            totalAmount,
+            address,
+        });
+
+        await newPurchase.save();
+        res.send({ success: true, message: "Purchase successful" });
+    } catch (err) {
+        console.error("Purchase error:", err);
+        res.status(500).send({ success: false, message: "Purchase failed" });
+    }
+});
+
+// Endpoint to fetch all purchase details
+app.get('/purchase-details', async (req, res) => {
+    try {
+        const purchases = await Purchase.find({})
+            .populate('user', 'name email') 
+            .populate('products') 
+            .populate('address') 
+            .select('-__v');
+
+        if (!purchases || purchases.length === 0) {
+            return res.status(404).json({ success: false, message: "No purchases found" });
+        }
+
+        res.status(200).json({ success: true, purchases });
+    } catch (error) {
+        console.error("Error fetching all purchase details:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+});
+
+// Endpoint to cancel a purchase
+app.put("/cancelpurchase/:id", fetchUser, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const purchaseId = req.params.id;
+
+    const purchase = await Purchase.findOne({ _id: purchaseId, user: userId });
+
+    if (!purchase) {
+      return res.status(404).send({
+        success: false,
+        message: "Purchase not found",
+      });
+    }
+
+    const timeDiff = Date.now() - new Date(purchase.date).getTime();
+    const fiveDays = 5 * 24 * 60 * 60 * 1000; 
+
+    if (timeDiff > fiveDays) {
+      return res.status(403).send({
+        success: false,
+        message: "Cancellation period expired",
+      });
+    }
+
+    if (purchase.isCancelled) {
+      return res.status(400).send({
+        success: false,
+        message: "Purchase already cancelled",
+      });
+    }
+
+    purchase.isCancelled = true;
+    await purchase.save();
+
+    return res.status(200).send({
+      success: true,
+      message: "Purchase cancelled successfully",
+      purchase,
+    });
+  } catch (err) {
+    console.error("Cancel error:", err);
+    return res.status(500).send({
+      success: false,
+      message: "Error cancelling purchase",
+    });
+  }
+});
+
+app.put("/undocancelpurchase/:id", fetchUser, async (req, res) => {
+    try {
+        const purchase = await Purchase.findById(req.params.id);
+
+        if (!purchase) {
+            return res.status(404).json({ success: false, message: "Purchase not found" });
+        }
+
+        if (!purchase.isCancelled) {
+            return res.status(400).json({ success: false, message: "Purchase is not cancelled" });
+        }
+
+        purchase.isCancelled = false;
+        await purchase.save();
+
+        res.status(200).json({ success: true, message: "Cancellation undone successfully", purchase });
+    } catch (error) {
+        console.error("Error undoing cancellation:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+});
+
 // Endpoint to fetch all users' address details for the admin page
 app.get('/getaddress', fetchUser, async (req, res) => {
     try {
@@ -527,7 +745,7 @@ app.post('/removefromcart',fetchUser,async(req,res)=>{
     if(userData.cartData[req.body.itemId]>0)
     userData.cartData[req.body.itemId] -=1;
     await Users.findByIdAndUpdate({_id:req.user.id},{cartData:userData.cartData});
-    res.send("Removed")
+    res.json({ message: "Removed" })
 })
 
 //creating endpoint to get cartdata

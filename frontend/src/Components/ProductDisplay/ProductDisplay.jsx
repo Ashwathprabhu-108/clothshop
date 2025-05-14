@@ -36,7 +36,6 @@ const ProductDisplay = (props) => {
     if (!productData) {
         return <p>Loading product...</p>;
     }
-
     const rating = Math.min(Math.max(Number(averageRating), 1), 5);
 
     return (
