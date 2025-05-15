@@ -196,6 +196,85 @@ app.get('/product/:id', async (req, res) => {
     }
 });
 
+//schema for Purchase 
+const Purchase = mongoose.model("Purchase", {
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Users",
+    required: true,
+  },
+  products: [
+    {
+      id: { type: Number, required: true },
+      name: { type: String, required: true },
+      image: { type: String, required: true },
+      category: { type: String, required: true },
+      new_price: { type: Number, required: true },
+      old_price: { type: Number, required: true },
+      description: { type: String, required: true },
+      quantity: { type: Number, default: 1 },
+    },
+  ],
+  totalAmount: {
+    type: Number,
+    required: true,
+  },
+  address: {
+    type: new mongoose.Schema({
+      fullAddress: { type: String, required: true },
+      street: { type: String, required: true },
+      city: { type: String, required: true },
+      district: { type: String, required: true },
+      state: { type: String, required: true },
+      pincode: { type: String, required: true },
+      phoneNumber: { type: String, required: true },
+    }),
+    required: true,
+  },
+  status: {
+    type: String,
+    enum: ["pending", "completed", "failed"],
+    default: "completed",
+  },
+  date: {
+    type: Date,
+    default: Date.now,
+  },
+  isCancelled: {
+    type: Boolean,
+    default: false,
+  },
+   delivered: {
+    type: Boolean,
+    default: false, 
+  },
+});
+
+// Endpoint to update the delivered status of a purchase
+app.put('/update-delivered/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { delivered } = req.body;
+
+        if (typeof delivered !== 'boolean') {
+            return res.status(400).json({ success: false, message: "Invalid value for delivered. It must be a boolean." });
+        }
+
+        const purchase = await Purchase.findById(id);
+
+        if (!purchase) {
+            return res.status(404).json({ success: false, message: "Purchase not found" });
+        }
+
+        purchase.delivered = delivered;
+        await purchase.save();
+
+        res.status(200).json({ success: true, message: "Delivered status updated successfully", purchase });
+    } catch (error) {
+        console.error("Error updating delivered status:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+});
 
 // Schema Creating for User model
 const Users = mongoose.model('Users', {
@@ -512,56 +591,6 @@ const fetchUser = async (req,res,next)=>{
     }
 }
 
-//schema for Purchase 
-const Purchase = mongoose.model("Purchase", {
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Users",
-    required: true,
-  },
-  products: [
-    {
-      id: { type: Number, required: true },
-      name: { type: String, required: true },
-      image: { type: String, required: true },
-      category: { type: String, required: true },
-      new_price: { type: Number, required: true },
-      old_price: { type: Number, required: true },
-      description: { type: String, required: true },
-      quantity: { type: Number, default: 1 },
-    },
-  ],
-  totalAmount: {
-    type: Number,
-    required: true,
-  },
-  address: {
-    type: new mongoose.Schema({
-      fullAddress: { type: String, required: true },
-      street: { type: String, required: true },
-      city: { type: String, required: true },
-      district: { type: String, required: true },
-      state: { type: String, required: true },
-      pincode: { type: String, required: true },
-      phoneNumber: { type: String, required: true },
-    }),
-    required: true,
-  },
-  status: {
-    type: String,
-    enum: ["pending", "completed", "failed"],
-    default: "completed",
-  },
-  date: {
-    type: Date,
-    default: Date.now,
-  },
-  isCancelled: {
-    type: Boolean,
-    default: false,
-  },
-});
-
 //creating endpoint for purchase and save in purchase collection
 app.post("/purchase", fetchUser, async (req, res) => {
     try {
@@ -774,7 +803,6 @@ app.get("/getuser", async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // Exclude sensitive information like the password
         const { password, ...userDetails } = user.toObject();
         res.status(200).json(userDetails);
     } catch (err) {
@@ -820,6 +848,7 @@ app.get('/getallcartdetails', async (req, res) => {
         res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 });
+
 //creating schema for delivery login and register
 const Delivery = mongoose.model('Delivery', {
     name: {

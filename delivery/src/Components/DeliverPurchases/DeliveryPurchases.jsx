@@ -53,6 +53,33 @@ const DeliveryPurchases = () => {
     setSelectedProduct(null); // Clear product details when a user is selected
   };
 
+const handleDeliveredUpdate = async (purchaseId, deliveredStatus) => {
+  try {
+    const response = await fetch(`http://localhost:4000/update-delivered/${purchaseId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ delivered: deliveredStatus }),
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      setPurchaseData((prevData) =>
+        prevData.map((purchase) =>
+          purchase._id === purchaseId ? { ...purchase, delivered: deliveredStatus } : purchase
+        )
+      );
+      alert('Delivered status updated successfully!');
+    } else {
+      alert(data.message || 'Failed to update delivered status.');
+    }
+  } catch (error) {
+    console.error('Error updating delivered status:', error);
+    alert('An error occurred while updating delivered status.');
+  }
+};
+
   return (
     <div className='purchase-details'>
       <h1>Purchase Details</h1>
@@ -66,6 +93,7 @@ const DeliveryPurchases = () => {
                 <th>User</th>
                 <th>Total Amount</th>
                 <th>Status</th>
+                <th>Delivered</th>
                 <th>Date & Time</th>
               </tr>
             </thead>
@@ -92,6 +120,15 @@ const DeliveryPurchases = () => {
                   </td>
                   <td>₹{purchase.totalAmount}</td>
                   <td>{purchase.isCancelled ? 'Cancelled' : purchase.status}</td>
+                  <td>
+                    <button
+  onClick={() => handleDeliveredUpdate(purchase._id, !purchase.delivered)}
+  className={purchase.delivered ? 'delivered' : 'not-delivered'}
+>
+  {purchase.delivered ? 'Mark as Undelivered' : 'Mark as Delivered'}
+</button>
+
+                  </td>
                   <td>{new Date(purchase.date).toLocaleString()}</td>
                 </tr>
               ))}
