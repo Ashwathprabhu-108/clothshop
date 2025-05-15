@@ -1,0 +1,152 @@
+.purchase-details {
+  padding: 30px;
+  font-family: Arial, sans-serif;
+  background-color: #fafafa;
+  min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.purchase-details h1 {
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.purchase-section {
+  max-height: 70vh;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.purchase-section::-webkit-scrollbar {
+  display: none;
+}
+
+.purchase-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.purchase-table th,
+.purchase-table td {
+  padding: 14px 18px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  vertical-align: top;
+}
+
+.purchase-table th {
+  background-color: #f0f0f0;
+  font-weight: 600;
+  color: #555;
+}
+
+.purchase-table td {
+  color: #444;
+}
+
+.purchase-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+.purchase-product-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 4px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.purchase-table td > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.clickable {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.clickable:hover {
+  background-color: #f1f1f1;
+}
+
+.details-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 25px 30px;
+  max-width: 400px;
+  width: 90%;
+  z-index: 999;
+}
+
+.details-modal h2 {
+  margin-top: 0;
+  color: #222;
+}
+
+.details-modal p {
+  margin: 8px 0;
+  color: #333;
+}
+
+.details-modal button {
+  margin-top: 15px;
+  padding: 8px 14px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.details-modal button:hover {
+  background-color: #0056b3;
+}
+
+@media (max-width: 768px) {
+  .purchase-details {
+    padding: 20px 10px;
+  }
+
+  .purchase-table th,
+  .purchase-table td {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .purchase-product-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .purchase-table td > div {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .details-modal {
+    max-width: 90%;
+    padding: 20px;
+  }
+}

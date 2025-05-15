@@ -820,10 +820,137 @@ app.get('/getallcartdetails', async (req, res) => {
         res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 });
+//creating schema for delivery login and register
+const Delivery = mongoose.model('Delivery', {
+    name: {
+        type: String,
+        required: true,
+    },
+    email: {
+        type: String,
+        unique: true,
+        required: true,
+    },
+    password: {
+        type: String,
+        required: true,
+    },
+    location: {
+        type: new mongoose.Schema({
+            city: { type: String, required: true },
+            district: { type: String, required: true },
+            state: { type: String, required: true },
+            pincode: { type: String, required: true },
+        }),
+        required: true,
+    },
+});
+
+//creating endpoint for delivery signup
+app.post('/deliverysignup', async (req, res) => {
+    try {
+        const { name, email, password, location } = req.body;
+
+        const existingDelivery = await Delivery.findOne({ email });
+        if (existingDelivery) {
+            return res.status(400).json({ success: false, message: "Delivery user with this email already exists" });
+        }
+
+        const deliveryUser = new Delivery({
+            name,
+            email,
+            password,
+            location: {
+                city: location.city,
+                district: location.district,
+                state: location.state,
+                pincode: location.pincode,
+            },
+        });
+
+        await deliveryUser.save();
+
+        const data = {
+            deliveryUser: {
+                id: deliveryUser.id,
+            },
+        };
+        const token = jwt.sign(data, 'secret_ecom');
+
+        res.status(201).json({ success: true, token });
+    } catch (error) {
+        console.error("Error in delivery signup:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+});
+
+//creating endpoint for delivery login
+app.post('/deliverylogin', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        const deliveryUser = await Delivery.findOne({ email });
+        if (!deliveryUser) {
+            return res.status(404).json({ success: false, message: "Delivery user not found" });
+        }
+
+        if (deliveryUser.password !== password) {
+            return res.status(400).json({ success: false, message: "Invalid credentials" });
+        }
+
+        const data = {
+            deliveryUser: {
+                id: deliveryUser.id,
+            },
+        };
+        const token = jwt.sign(data, 'secret_ecom');
+
+        res.status(200).json({ success: true, token });
+    } catch (error) {
+        console.error("Error in delivery login:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+});
+
+//creating endpoint for getting all purchse matching to delivery
+app.get('/fetch-matching-purchases/:deliveryId', async (req, res) => {
+    try {
+        const { deliveryId } = req.params;
+
+        // Find the delivery user by ID
+        const deliveryUser = await Delivery.findById(deliveryId);
+        if (!deliveryUser) {
+            return res.status(404).json({ success: false, message: "Delivery user not found" });
+        }
+
+        const { city, district, state, pincode } = deliveryUser.location;
+
+        // Find purchases that match the delivery user's location and populate all relevant details
+        const matchingPurchases = await Purchase.find({
+            "address.city": city,
+            "address.district": district,
+            "address.state": state,
+            "address.pincode": pincode,
+        })
+        .populate('user', 'name email') // Populate user details (name and email)
+        .populate({
+            path: 'products',
+            select: 'id name image category new_price old_price description quantity', // Select product fields
+        })
+        .select('-__v'); // Exclude unnecessary fields like `__v`
+
+        if (matchingPurchases.length === 0) {
+            return res.status(404).json({ success: false, message: "No matching purchases found" });
+        }
+
+        res.status(200).json({ success: true, purchases: matchingPurchases });
+    } catch (error) {
+        console.error("Error fetching matching purchases:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+});
 
 // Schema Creating for User model
-
-
 app.listen(port,(error)=>{
     if (!error) {
         console.log("Server Running on Port "+port)
