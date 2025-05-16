@@ -8,6 +8,7 @@ import UserCart from '../../Components/UserCart/UserCart'
 import UserCartItems from '../../Components/UserCart/UserCartItems/UserCartItems'
 import PurchaseDetails from '../../Components/PurchaseDetails/PurchaseDetails'
 import EditProduct from '../../Components/Listproduct/EditProduct/EditProduct'
+import Couriers from '../../Components/Couriers/Couriers'
 
 const Admin = () => {
   return (
@@ -20,6 +21,7 @@ const Admin = () => {
           <Route path='/usercart' element={<UserCart/>}/>
           <Route path="/usercartitems" element={<UserCartItems/>} />
           <Route path='/purchase' element={<PurchaseDetails/>}/>
+          <Route path='/courier' element={<Couriers/>}/>
         </Routes>
     </div>
   )

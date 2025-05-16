@@ -100,6 +100,59 @@ const Product = mongoose.model("Product", {
     },
 });
 
+//schema for Purchase 
+const Purchase = mongoose.model("Purchase", {
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Users",
+    required: true,
+  },
+  products: [
+    {
+      id: { type: Number, required: true },
+      name: { type: String, required: true },
+      image: { type: String, required: true },
+      category: { type: String, required: true },
+      new_price: { type: Number, required: true },
+      old_price: { type: Number, required: true },
+      description: { type: String, required: true },
+      quantity: { type: Number, default: 1 },
+    },
+  ],
+  totalAmount: {
+    type: Number,
+    required: true,
+  },
+  address: {
+    type: new mongoose.Schema({
+      fullAddress: { type: String, required: true },
+      street: { type: String, required: true },
+      city: { type: String, required: true },
+      district: { type: String, required: true },
+      state: { type: String, required: true },
+      pincode: { type: String, required: true },
+      phoneNumber: { type: String, required: true },
+    }),
+    required: true,
+  },
+  status: {
+    type: String,
+    enum: ["pending", "completed", "failed"],
+    default: "completed",
+  },
+  date: {
+    type: Date,
+    default: Date.now,
+  },
+  isCancelled: {
+    type: Boolean,
+    default: false,
+  },
+   delivered: {
+    type: Boolean,
+    default: false, 
+  },
+});
 
 //Api to add product
 app.post('/addproduct', async (req, res) => {
@@ -196,60 +249,6 @@ app.get('/product/:id', async (req, res) => {
     }
 });
 
-//schema for Purchase 
-const Purchase = mongoose.model("Purchase", {
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Users",
-    required: true,
-  },
-  products: [
-    {
-      id: { type: Number, required: true },
-      name: { type: String, required: true },
-      image: { type: String, required: true },
-      category: { type: String, required: true },
-      new_price: { type: Number, required: true },
-      old_price: { type: Number, required: true },
-      description: { type: String, required: true },
-      quantity: { type: Number, default: 1 },
-    },
-  ],
-  totalAmount: {
-    type: Number,
-    required: true,
-  },
-  address: {
-    type: new mongoose.Schema({
-      fullAddress: { type: String, required: true },
-      street: { type: String, required: true },
-      city: { type: String, required: true },
-      district: { type: String, required: true },
-      state: { type: String, required: true },
-      pincode: { type: String, required: true },
-      phoneNumber: { type: String, required: true },
-    }),
-    required: true,
-  },
-  status: {
-    type: String,
-    enum: ["pending", "completed", "failed"],
-    default: "completed",
-  },
-  date: {
-    type: Date,
-    default: Date.now,
-  },
-  isCancelled: {
-    type: Boolean,
-    default: false,
-  },
-   delivered: {
-    type: Boolean,
-    default: false, 
-  },
-});
-
 // Endpoint to update the delivered status of a purchase
 app.put('/update-delivered/:id', async (req, res) => {
     try {
@@ -266,12 +265,80 @@ app.put('/update-delivered/:id', async (req, res) => {
             return res.status(404).json({ success: false, message: "Purchase not found" });
         }
 
+        // Only update stock if marking as delivered and not already delivered
+        if (delivered && !purchase.delivered) {
+            for (const product of purchase.products) {
+                // Ensure product.id is a number for the query
+                const prodDoc = await Product.findOne({ id: Number(product.id) });
+                if (prodDoc) {
+                    const updatedStock = Math.max((prodDoc.stock ?? 0) - product.quantity, 0);
+                    prodDoc.stock = updatedStock;
+                    prodDoc.available = updatedStock > 0;
+                    await prodDoc.save();
+                } else {
+                    console.warn(`Product not found for id: ${product.id}`);
+                }
+            }
+        }
+
         purchase.delivered = delivered;
         await purchase.save();
 
         res.status(200).json({ success: true, message: "Delivered status updated successfully", purchase });
     } catch (error) {
         console.error("Error updating delivered status:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+});
+
+//creating schema for delivery login and register
+const Delivery = mongoose.model('Delivery', {
+    name: {
+        type: String,
+        required: true,
+    },
+    email: {
+        type: String,
+        unique: true,
+        required: true,
+    },
+    password: {
+        type: String,
+        required: true,
+    },
+    location: {
+        type: new mongoose.Schema({
+            city: { type: String, required: true },
+            district: { type: String, required: true },
+            state: { type: String, required: true },
+            pincode: { type: String, required: true },
+        }),
+        required: true,
+    },
+});
+
+// Get all delivery users
+app.get('/getalldelivery', async (req, res) => {
+    try {
+        const deliveryUsers = await Delivery.find({});
+        res.status(200).json({ success: true, deliveryUsers });
+    } catch (error) {
+        console.error("Error fetching delivery users:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+});
+
+// Remove a delivery user by email
+app.post('/removedelivery', async (req, res) => {
+    try {
+        const { email } = req.body;
+        const removed = await Delivery.findOneAndDelete({ email });
+        if (!removed) {
+            return res.status(404).json({ success: false, message: "Delivery user not found" });
+        }
+        res.json({ success: true, message: "Delivery user removed", email });
+    } catch (error) {
+        console.error("Error removing delivery user:", error);
         res.status(500).json({ success: false, message: "Internal server error" });
     }
 });
@@ -847,32 +914,6 @@ app.get('/getallcartdetails', async (req, res) => {
         console.error("Error fetching cart details:", error);
         res.status(500).json({ success: false, message: "Internal Server Error" });
     }
-});
-
-//creating schema for delivery login and register
-const Delivery = mongoose.model('Delivery', {
-    name: {
-        type: String,
-        required: true,
-    },
-    email: {
-        type: String,
-        unique: true,
-        required: true,
-    },
-    password: {
-        type: String,
-        required: true,
-    },
-    location: {
-        type: new mongoose.Schema({
-            city: { type: String, required: true },
-            district: { type: String, required: true },
-            state: { type: String, required: true },
-            pincode: { type: String, required: true },
-        }),
-        required: true,
-    },
 });
 
 //creating endpoint for delivery signup

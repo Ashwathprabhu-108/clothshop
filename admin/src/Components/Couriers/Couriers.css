@@ -1,0 +1,96 @@
+.couriers-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90%;
+  max-height: 740px;
+  margin: 30px auto;
+  padding: 24px 32px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  overflow-y: auto; /* Scroll if content grows */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.couriers-list h1 {
+  font-size: 2rem;
+  margin-bottom: 24px;
+  color: #333;
+  font-weight: 700;
+  text-align: center;
+}
+
+.courier-format-main {
+  display: grid;
+  grid-template-columns: 2fr 3fr 4fr 1fr; /* similar to cart layout, wider location */
+  gap: 10px;
+  width: 100%;
+  padding: 12px 0;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #555;
+  border-bottom: 2px solid #eee;
+  text-align: center;
+  align-items: center;
+}
+
+.courier-all {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.courier-info {
+  display: grid;
+  grid-template-columns: 2fr 3fr 4fr 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 14px 0;
+  font-weight: 500;
+  color: #444;
+  font-size: 1rem;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+  word-break: break-word;
+  transition: background-color 0.2s ease;
+  border-radius: 4px;
+}
+
+.courier-info:hover {
+  background-color: #f9f9f9;
+}
+
+.courier-remove-icon {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.15s ease, filter 0.15s ease;
+  cursor: pointer;
+}
+
+.courier-remove-icon:hover {
+  transform: scale(1.15);
+  filter: brightness(0.7);
+}
+
+/* Responsive for smaller screens */
+
+@media (max-width: 800px) {
+  .couriers-list {
+    width: 95%;
+    padding: 16px 24px;
+    max-height: none;
+    margin: 20px auto;
+  }
+
+  .courier-format-main,
+  .courier-info {
+    grid-template-columns: 1.5fr 3fr 3fr 1fr; 
+    font-size: 0.9rem;
+    padding: 10px 0;
+  }
+
+  .courier-remove-icon {
+    width: 20px;
+    height: 20px;
+  }
+}

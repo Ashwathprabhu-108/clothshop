@@ -35,6 +35,7 @@ const PurchaseDetails = () => {
                 <th>User</th>
                 <th>Total Amount</th>
                 <th>Status</th>
+                <th>Delivered</th>
                 <th>Date & Time</th>
               </tr>
             </thead>
@@ -52,6 +53,7 @@ const PurchaseDetails = () => {
                   <td>{purchase.user.name} ({purchase.user.email})</td>
                   <td>₹{purchase.totalAmount}</td>
                   <td>{purchase.isCancelled ? 'Cancelled' : purchase.status}</td>
+                  <td>{purchase.delivered ? 'Yes' : 'No'}</td>
                   <td>{new Date(purchase.date).toLocaleString()}</td>
                 </tr>
               ))}
