@@ -121,10 +121,27 @@ const DeliveryPurchases = () => {
                   <td>
                     <button
                       onClick={() => handleDeliveredUpdate(purchase._id)}
-                      className={purchase.delivered ? 'delivered' : 'not-delivered'}
-                      disabled={purchase.delivered}
+                      className={
+                        purchase.delivered
+                          ? 'delivered'
+                          : purchase.isCancelled
+                          ? 'not-delivered cancelled'
+                          : 'not-delivered'
+                      }
+                      disabled={purchase.delivered || purchase.isCancelled}
+                      title={
+                        purchase.delivered
+                          ? 'Already delivered'
+                          : purchase.isCancelled
+                          ? 'Cannot deliver a cancelled purchase'
+                          : 'Mark this as delivered'
+                      }
                     >
-                      {purchase.delivered ? 'Delivered' : 'Mark as Delivered'}
+                      {purchase.delivered
+                        ? 'Delivered'
+                        : purchase.isCancelled
+                        ? 'Cancelled'
+                        : 'Mark as Delivered'}
                     </button>
                   </td>
                   <td>{new Date(purchase.date).toLocaleString()}</td>

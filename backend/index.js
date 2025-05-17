@@ -779,6 +779,20 @@ app.put("/undocancelpurchase/:id", fetchUser, async (req, res) => {
     }
 });
 
+// Middleware to authenticate user to fetch user purchase (already present as fetchUser)
+app.get('/my-purchases', fetchUser, async (req, res) => {
+    try {
+        const purchases = await Purchase.find({ user: req.user.id })
+            .populate('user', 'name email')
+            .populate('products')
+            .select('-__v');
+        res.status(200).json({ success: true, purchases });
+    } catch (error) {
+        console.error("Error fetching user's purchases:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+});
+
 // Endpoint to fetch all users' address details for the admin page
 app.get('/getaddress', fetchUser, async (req, res) => {
     try {
@@ -1028,6 +1042,5 @@ app.listen(port,(error)=>{
     else
     {
         console.log("Error:"+error)
-        
     }
 })

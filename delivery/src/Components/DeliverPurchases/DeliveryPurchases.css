@@ -134,7 +134,10 @@
   opacity: 0.6;
   pointer-events: none;
 }
-
+.cancelled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
 .delivered:hover {
   background-color: #218838;
 }

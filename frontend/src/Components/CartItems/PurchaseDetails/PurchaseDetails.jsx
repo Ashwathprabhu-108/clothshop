@@ -7,7 +7,7 @@ const PurchaseDetails = () => {
     const [editIndex, setEditIndex] = useState(null);
     const [editedAddress, setEditedAddress] = useState({});
     const [purchases, setPurchases] = useState([]);
-    const { getTotalCartAmount, all_product, cartItems,removeFromCart} = useContext(ShopContext);
+    const { getTotalCartAmount, all_product, cartItems, removeFromCart } = useContext(ShopContext);
 
     useEffect(() => {
         const fetchAddress = async () => {
@@ -29,37 +29,37 @@ const PurchaseDetails = () => {
             }
         };
 
-const fetchPurchases = async () => {
-    try {
-        const token = localStorage.getItem("auth-token");
+        const fetchPurchases = async () => {
+            try {
+                const token = localStorage.getItem("auth-token");
 
-        if (!token) {
-            setPurchases([]);
-            return;
-        }
+                if (!token) {
+                    setPurchases([]);
+                    return;
+                }
 
-        const response = await fetch("http://localhost:4000/purchase-details", {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "auth-token": token,
-            },
-        });
+                const response = await fetch("http://localhost:4000/my-purchases", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "auth-token": token,
+                    },
+                });
 
-        const data = await response.json();
+                const data = await response.json();
 
-        if (response.ok && data.success && Array.isArray(data.purchases)) {
-            const validPurchases = data.purchases.filter(
-                (p) => p && typeof p === "object" && p.date
-            );
-            setPurchases(validPurchases);
-        } else {
-            setPurchases([]);
-        }
-    } catch (error) {
-        setPurchases([]);
-    }
-};
+                if (response.ok && data.success && Array.isArray(data.purchases)) {
+                    const validPurchases = data.purchases.filter(
+                        (p) => p && typeof p === "object" && p.date
+                    );
+                    setPurchases(validPurchases);
+                } else {
+                    setPurchases([]);
+                }
+            } catch (error) {
+                setPurchases([]);
+            }
+        };
 
         fetchAddress();
         fetchPurchases();
@@ -152,9 +152,9 @@ const fetchPurchases = async () => {
                 alert("Purchase successful!");
                 setPurchases((prev) => [...prev, data.purchase]);
                 all_product.forEach((e) => {
-                if (cartItems[e.id] > 0) {
-                removeFromCart(e.id);
-                }
+                    if (cartItems[e.id] > 0) {
+                        removeFromCart(e.id);
+                    }
                 });
             } else {
                 alert("Purchase failed: " + data.message);
@@ -301,25 +301,27 @@ const fetchPurchases = async () => {
                     <p>No purchases found.</p>
                 ) : (
                     purchases
-                    .filter(p => p && typeof p === "object" && p.date)
-                    .map((purchase) => {
-                        const formattedDate = purchase.date? new Date(purchase.date).toLocaleString() : "Unknown";
-                        const productNames = Array.isArray(purchase.products) ? purchase.products.map(item => item.name).join(", ") : "N/A";
-                        return (
-                            <div key={purchase._id} className="purchase-entry">
-                                <p><strong>Products:</strong> {productNames}</p>
-                                <p><strong>Date:</strong> {formattedDate}</p>
-                                <p><strong>Total:</strong> ₹{purchase.totalAmount}</p>
-                                <p><strong>Status:</strong> {purchase.isCancelled ? "Cancelled" : "Active"}</p>
-                                {purchase.isCancelled ? (
-                                    <button onClick={() => handleUndoCancelPurchase(purchase._id)}>Undo Cancel</button>
-                                ) : (
-                                    <button onClick={() => handleCancelPurchase(purchase._id)}>Cancel</button>
-                                )}
-                                <hr />
-                            </div>
-                        );
-                    })
+                        .filter(p => p && typeof p === "object" && p.date)
+                        .map((purchase) => {
+                            const formattedDate = purchase.date ? new Date(purchase.date).toLocaleString() : "Unknown";
+                            const productNames = Array.isArray(purchase.products) ? purchase.products.map(item => item.name).join(", ") : "N/A";
+                            return (
+                                <div key={purchase._id} className="purchase-entry">
+                                    <p><strong>Products:</strong> {productNames}</p>
+                                    <p><strong>Date:</strong> {formattedDate}</p>
+                                    <p><strong>Total:</strong> ₹{purchase.totalAmount}</p>
+                                    <p><strong>Status:</strong> {purchase.isCancelled ? "Cancelled" : "Active"}</p>
+                                    {purchase.isCancelled ? (
+                                        <button onClick={() => handleUndoCancelPurchase(purchase._id)}>Undo Cancel</button>
+                                    ) : (
+                                        !purchase.delivered && (
+                                            <button onClick={() => handleCancelPurchase(purchase._id)}>Cancel</button>
+                                        )
+                                    )}
+                                    <hr />
+                                </div>
+                            );
+                        })
                 )}
             </div>
         </div>
